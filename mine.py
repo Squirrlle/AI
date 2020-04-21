@@ -138,10 +138,103 @@ def parseinput(inputstring, gridsize, helpmessage):
 
     return {'cell': cell, 'flag': flag, 'message': message}
 
+def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
+    #array of prob
+    nNull = 0
+    uSpace = 0
+    nFlag = 0
+    pVal = [tl, tm, tr, ml, mr, bl, bm, br]
+    # print(pVal)
+    #Counts empty, unchecked and flagged spaces
+    for i in range(len(pVal)):
+        # print(i)
+        if pVal[i] == -1:
+            nNull = nNull + 1
+        if isinstance(pVal[i], int):
+            uSpace = uSpace + 1
+        if pVal[i] == 'F':
+            nFlag = nFlag + 1
+    nRemain = 8 - (nNull + uSpace)
+    if(nRemain > 0):
+        prob = (int(cnode) - nFlag) / nRemain
+    else:
+        print("Something is wrong")
+    for i in range(len(pVal)):
+        if(pVal[i] == ' '):
+            pVal[i] = prob
+        else:
+            pVal[i] = 0
+
+    return pVal
+
+def AI(currgrid, probGrid):
+    gridsize = 9
+    pGrid = probGrid
+    for i in range(gridsize):
+        for x in range(gridsize):
+            cnode = currgrid[i][x]
+            if(cnode.isdigit()):
+                if(int(cnode) > 0):
+                    # Eval:
+                    if(i + 1 < gridsize):
+                        tm = currgrid[i + 1][x]
+                        if(x - 1 >= 0):
+                            tl = currgrid[i + 1][x - 1]
+                        else:
+                            tl = -1
+                        if(x + 1 < gridsize):
+                            tr = currgrid[i + 1][x + 1]
+                        else:
+                            tr = -1
+                    else:
+                        tm = tl = tr = -1
+                    if(x - 1 >= 0):
+                        ml = currgrid[i][x - 1]
+                    else:
+                        ml = -1
+                    if(x + 1 < gridsize):
+                        mr = currgrid[i][x + 1]
+                    else:
+                        mr = -1
+                    if(i - 1 >= 0):
+                        bm = currgrid[i - 1][x]
+                        if(x - 1 >= 0):
+                            bl = currgrid[i - 1][x - 1]
+                        else:
+                            bl = -1
+                        if(x + 1 < gridsize):
+                            br = currgrid[i - 1][x + 1]
+                        else:
+                            br = -1
+                    else:
+                        bl = bm = br = -1
+                    #Evaluating the spaces
+                    # print(i, x)
+                    pVal = Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br)
+                    if(pVal[0] != 0):
+                        pGrid[i + 1][x - 1] += pVal[0]
+                    if(pVal[1] != 0):
+                        pGrid[i + 1][x] += pVal[1]
+                    if(pVal[2] != 0):
+                        pGrid[i + 1][x + 1] += pVal[2]
+                    if(pVal[3] != 0):
+                        pGrid[i][x - 1] += pVal[3]
+                    if(pVal[4] != 0):
+                        pGrid[i][x + 1] += pVal[4]
+                    if(pVal[5] != 0):
+                        pGrid[i - 1][x - 1] += pVal[5]
+                    if(pVal[6] != 0):
+                        pGrid[i - 1][x] += pVal[6]
+                    if(pVal[7] != 0):
+                        pGrid[i - 1][x + 1] += pVal[7]
+
+    return pGrid
+
 
 def playgame():
     gridsize = 9
     numberofmines = 10
+    probGrid = [[(numberofmines / (gridsize * gridsize)) for i in range(gridsize)] for i in range(gridsize)]
 
     currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
 
@@ -215,12 +308,13 @@ def playgame():
                 return
 
         showgrid(currgrid)
+        probGrid = AI(currgrid, probGrid)
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         f = open("grid.txt", "a")
-        for ele in currgrid:
+        for ele in probGrid:
             for i in ele:
-                f.write('| ' + i + ' |')
+                f.write(str(i))
             f.write('\n')
         f.close()
         print(message)

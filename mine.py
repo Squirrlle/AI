@@ -3,6 +3,7 @@ import random
 import re
 import time
 import os
+import copy
 from string import ascii_lowercase
 
 
@@ -138,6 +139,29 @@ def parseinput(inputstring, gridsize, helpmessage):
 
     return {'cell': cell, 'flag': flag, 'message': message}
 
+def quickUpdate(currgrid, probGrid, gridsize, numberofmines):
+    pG = copy.deepcopy(probGrid)
+    numRevield = 0
+    numFlag = 0
+    oldProb = numberofmines / (gridsize * gridsize)
+    for i in range(gridsize):
+        for x in range(gridsize):
+            if currgrid[i][x].isdigit():
+                numRevield += 1
+                pG[i][x] = 0
+            if(currgrid[i][x] == 'F'):
+                numFlag += 1
+    cellLeft = (gridsize * gridsize) - numRevield
+    newMine = numberofmines - numFlag
+    newProb = (newMine) / cellLeft
+    proDiff = newProb - oldProb
+    for i in range(gridsize):
+        for x in range(gridsize):
+            if pG[i][x] != 0:
+                pG[i][x] += proDiff
+
+    return pG
+
 def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
     #array of prob
     nNull = 0
@@ -150,7 +174,7 @@ def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
         # print(i)
         if pVal[i] == -1:
             nNull = nNull + 1
-        if isinstance(pVal[i], int):
+        if pVal[i].isdigit():
             uSpace = uSpace + 1
         if pVal[i] == 'F':
             nFlag = nFlag + 1
@@ -173,7 +197,7 @@ def AI(currgrid, probGrid):
     for i in range(gridsize):
         for x in range(gridsize):
             cnode = currgrid[i][x]
-            if(cnode.isdigit()):
+            if cnode.isdigit():
                 if(int(cnode) > 0):
                     # Eval:
                     if(i + 1 < gridsize):
@@ -210,7 +234,7 @@ def AI(currgrid, probGrid):
                         bl = bm = br = -1
                     #Evaluating the spaces
                     # print(i, x)
-                    pVal = Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br)
+                    pVal = Eval(cnode, str(tl), str(tm), str(tr), str(ml), str(mr), str(bl), str(bm), str(br))
                     if(pVal[0] != 0):
                         pGrid[i + 1][x - 1] += pVal[0]
                     if(pVal[1] != 0):
@@ -309,12 +333,14 @@ def playgame():
 
         showgrid(currgrid)
         probGrid = AI(currgrid, probGrid)
+        probGrid = quickUpdate(currgrid, probGrid, gridsize, numberofmines)
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         f = open("grid.txt", "a")
         for ele in probGrid:
             for i in ele:
-                f.write(str(i))
+                tmp = "{:.3f}".format(i)
+                f.write("| " + str(tmp) + " | ")
             f.write('\n')
         f.close()
         print(message)

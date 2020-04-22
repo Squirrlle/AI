@@ -2,6 +2,7 @@
 import random
 import re
 import time
+import math
 import os
 import copy
 from collections import Counter 
@@ -67,6 +68,33 @@ def getneighbors(grid, rowno, colno):
 
     return neighbors
 
+def revieledNei(i, x, currgrid):
+    gridsize = len(currgrid)
+    numRevieled = 0
+    for y in range(-1, 2):
+        for z in range (-1, 2):
+            if y == 0 and z == 0:
+                continue
+            elif -1 < (i + y) < gridsize and -1 < (x + z) < gridsize:
+                if currgrid[i + y][x + z] != ' ':
+                    numRevieled += 1
+    return numRevieled
+
+def advProb(currgrid, probGrid, cProb):
+    gridsize = len(currgrid)
+    pG = copy.deepcopy(probGrid)
+    for i in range(gridsize):
+        for x in range(gridsize):
+            if currgrid[i][x].isdigit():
+                continue
+            else:
+                nRev = revieledNei(i, x, currgrid)
+                if nRev == 0 or probGrid[i][x] == 0:
+                    #TODO potentially change
+                    continue
+                else:
+                    pG[i][x] = (pG[i][x] - cProb) / nRev
+    return pG
 
 def getmines(grid, start, numberofmines):
     mines = []
@@ -140,7 +168,7 @@ def parseinput(inputstring, gridsize, helpmessage):
     return {'cell': cell, 'flag': flag, 'message': message}
 
 
-def difProb(currgrid, gridsize, minesleft, cProb):
+def difProb(currgrid, gridsize, minesleft):
     numRevield = 0
     for i in range(gridsize):
         for x in range(gridsize):
@@ -148,7 +176,7 @@ def difProb(currgrid, gridsize, minesleft, cProb):
                 numRevield += 1
     cellLeft = (gridsize * gridsize) - numRevield
     newProb = (minesleft) / cellLeft
-    return newProb - cProb
+    return newProb
 
 
 def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
@@ -157,34 +185,15 @@ def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
         for x in range(gridsize):
             if currgrid[i][x].isdigit():
                 pG[i][x] = 0
-    for i in range(gridsize):
-        for x in range(gridsize):
-            if pG[i][x] != 0:
-                pG[i][x] += difProb(currgrid, gridsize, minesleft, cProb)
 
     return pG
 
 def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
-    #array of prob
-    nNull = 0
-    uSpace = 0
-    nFlag = 0
     pVal = [tl, tm, tr, ml, mr, bl, bm, br]
-    # print(pVal)
-    #Counts empty, unchecked and flagged spaces
-    for i in range(len(pVal)):
-        # print(i)
-        if pVal[i] == -1:
-            nNull = nNull + 1
-        if pVal[i].isdigit():
-            uSpace = uSpace + 1
-        if pVal[i] == 'F':
-            nFlag = nFlag + 1
-    nRemain = 8 - (nNull + uSpace)
+    nRemain = pVal.count(' ')
+    nFlag = pVal.count('F')
     if(nRemain > 0):
         prob = (int(cnode) - nFlag) / nRemain
-    else:
-        print("Something is wrong")
     for i in range(len(pVal)):
         if(pVal[i] == ' '):
             pVal[i] = prob
@@ -193,9 +202,10 @@ def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
 
     return pVal
 
+#TODO if chance is 100 make sure that stays
 def AI(currgrid, probGrid):
     gridsize = 9
-    pGrid = probGrid
+    pGrid = copy.deepcopy(probGrid)
     for i in range(gridsize):
         for x in range(gridsize):
             cnode = currgrid[i][x]
@@ -298,8 +308,8 @@ def toInput(i, x):
     return move
 
 def most_frequent(probGrid):
-    flatList = [el for sublist in probGrid for el in sublist] 
-    return max(flatList, key = flatList.count) 
+    flatList = [el for sublist in probGrid for el in sublist]
+    return max(flatList, key = flatList.count)
 
 def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     goodMoves = ""
@@ -308,7 +318,7 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     cLarge = 0
     for i in range(gridsize):
         for x in range(gridsize):
-            if probGrid[i][x] != most_frequent(probGrid):
+            if probGrid[i][x] >= 0:
                 if probGrid[i][x] < cSmall:
                     if currgrid[i][x] == ' ':
                         cSmall = probGrid[i][x]
@@ -328,9 +338,6 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
 def playgame():
     gridsize = 9
     numberofmines = 10
-    cProb = (numberofmines / (gridsize * gridsize))
-    probGrid = [[ cProb for i in range(gridsize)] for i in range(gridsize)]
-
     currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
 
     grid = []
@@ -345,8 +352,6 @@ def playgame():
 
     while True:
         minesleft = numberofmines - len(flags)
-        cRevieled = currgrid.count(' ')
-        cProb = cRevieled / minesleft
         prompt = input('Enter the cell ({} mines left): '.format(minesleft))
         result = parseinput(prompt, gridsize, helpmessage + '\n')
 
@@ -405,8 +410,12 @@ def playgame():
                 return
 
         showgrid(currgrid)
+        minesleft = numberofmines - len(flags)
+        cProb = difProb(currgrid, gridsize, minesleft)
+        probGrid = [[ cProb for i in range(gridsize)] for i in range(gridsize)]
         probGrid = quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb)
         probGrid = AI(currgrid, probGrid)
+        probGrid = advProb(currgrid, probGrid, cProb)
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         f = open("grid.txt", "a")

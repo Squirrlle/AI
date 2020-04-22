@@ -6,7 +6,6 @@ import os
 import copy
 from string import ascii_lowercase
 
-
 def setupgrid(gridsize, start, numberofmines):
     emptygrid = [['0' for i in range(gridsize)] for i in range(gridsize)]
 
@@ -139,26 +138,21 @@ def parseinput(inputstring, gridsize, helpmessage):
 
     return {'cell': cell, 'flag': flag, 'message': message}
 
-def quickUpdate(currgrid, probGrid, gridsize, numberofmines):
+def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
     pG = copy.deepcopy(probGrid)
     numRevield = 0
-    numFlag = 0
-    oldProb = numberofmines / (gridsize * gridsize)
     for i in range(gridsize):
         for x in range(gridsize):
             if currgrid[i][x].isdigit():
                 numRevield += 1
                 pG[i][x] = 0
-            if(currgrid[i][x] == 'F'):
-                numFlag += 1
     cellLeft = (gridsize * gridsize) - numRevield
-    newMine = numberofmines - numFlag
-    newProb = (newMine) / cellLeft
-    proDiff = newProb - oldProb
+    newProb = (minesleft) / cellLeft
+    difProb = newProb - cProb
     for i in range(gridsize):
         for x in range(gridsize):
             if pG[i][x] != 0:
-                pG[i][x] += proDiff
+                pG[i][x] += difProb
 
     return pG
 
@@ -258,7 +252,8 @@ def AI(currgrid, probGrid):
 def playgame():
     gridsize = 9
     numberofmines = 10
-    probGrid = [[(numberofmines / (gridsize * gridsize)) for i in range(gridsize)] for i in range(gridsize)]
+    cProb = (numberofmines / (gridsize * gridsize))
+    probGrid = [[ cProb for i in range(gridsize)] for i in range(gridsize)]
 
     currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
 
@@ -274,6 +269,8 @@ def playgame():
 
     while True:
         minesleft = numberofmines - len(flags)
+        cRevieled = currgrid.count(' ')
+        cProb = cRevieled / minesleft
         prompt = input('Enter the cell ({} mines left): '.format(minesleft))
         result = parseinput(prompt, gridsize, helpmessage + '\n')
 
@@ -333,7 +330,7 @@ def playgame():
 
         showgrid(currgrid)
         probGrid = AI(currgrid, probGrid)
-        probGrid = quickUpdate(currgrid, probGrid, gridsize, numberofmines)
+        probGrid = quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb)
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         f = open("grid.txt", "a")

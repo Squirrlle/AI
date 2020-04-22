@@ -4,6 +4,7 @@ import re
 import time
 import os
 import copy
+from collections import Counter 
 from string import ascii_lowercase
 
 def setupgrid(gridsize, start, numberofmines):
@@ -138,21 +139,28 @@ def parseinput(inputstring, gridsize, helpmessage):
 
     return {'cell': cell, 'flag': flag, 'message': message}
 
-def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
-    pG = copy.deepcopy(probGrid)
+
+def difProb(currgrid, gridsize, minesleft, cProb):
     numRevield = 0
     for i in range(gridsize):
         for x in range(gridsize):
             if currgrid[i][x].isdigit():
                 numRevield += 1
-                pG[i][x] = 0
     cellLeft = (gridsize * gridsize) - numRevield
     newProb = (minesleft) / cellLeft
-    difProb = newProb - cProb
+    return newProb - cProb
+
+
+def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
+    pG = copy.deepcopy(probGrid)
+    for i in range(gridsize):
+        for x in range(gridsize):
+            if currgrid[i][x].isdigit():
+                pG[i][x] = 0
     for i in range(gridsize):
         for x in range(gridsize):
             if pG[i][x] != 0:
-                pG[i][x] += difProb
+                pG[i][x] += difProb(currgrid, gridsize, minesleft, cProb)
 
     return pG
 
@@ -289,14 +297,18 @@ def toInput(i, x):
     move = "( " +temp + ", " + str(i) + " ), "
     return move
 
-def nMove(currgrid, probGrid, gridsize, helpmessage, cProb):
+def most_frequent(probGrid):
+    flatList = [el for sublist in probGrid for el in sublist] 
+    return max(flatList, key = flatList.count) 
+
+def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     goodMoves = ""
     riskMoves = ""
     cSmall = 999
     cLarge = 0
     for i in range(gridsize):
         for x in range(gridsize):
-            if probGrid[i][x] != cProb:
+            if probGrid[i][x] != most_frequent(probGrid):
                 if probGrid[i][x] < cSmall:
                     if currgrid[i][x] == ' ':
                         cSmall = probGrid[i][x]
@@ -404,7 +416,7 @@ def playgame():
                 f.write("| " + str(tmp) + " | ")
             f.write('\n')
         f.close()
-        nMove(currgrid, probGrid, gridsize, helpmessage, cProb)
+        nMove(currgrid, probGrid, gridsize, minesleft, cProb)
         print(message)
 
 playgame()

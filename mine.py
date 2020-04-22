@@ -231,7 +231,7 @@ def AI(currgrid, probGrid):
                     pVal = Eval(cnode, str(tl), str(tm), str(tr), str(ml), str(mr), str(bl), str(bm), str(br))
                     if(pVal[0] != -1):
                         if pVal[0] == 0:
-                            pGrid[i + 1][x - 1] = 0;
+                            pGrid[i + 1][x - 1] = 0
                         elif pGrid[i + 1][x - 1] != 0:
                             pGrid[i + 1][x - 1] += pVal[0]
                     if(pVal[1] != -1):
@@ -272,6 +272,46 @@ def AI(currgrid, probGrid):
 
     return pGrid
 
+def toInput(i, x):
+    switcher = {
+        0: "a",
+        1: "b",
+        2: "c",
+        3: "d",
+        4: "e",
+        5: "f",
+        6: "g",
+        7: "h",
+        8: "i"
+    }
+    temp = switcher.get(x, "Invalid")
+    i += 1
+    move = "( " +temp + ", " + str(i) + " ), "
+    return move
+
+def nMove(currgrid, probGrid, gridsize, helpmessage, cProb):
+    goodMoves = ""
+    riskMoves = ""
+    cSmall = 999
+    cLarge = 0
+    for i in range(gridsize):
+        for x in range(gridsize):
+            if probGrid[i][x] != cProb:
+                if probGrid[i][x] < cSmall:
+                    if currgrid[i][x] == ' ':
+                        cSmall = probGrid[i][x]
+                        goodMoves = toInput(i, x)
+            if probGrid[i][x] > cLarge:
+                if currgrid[i][x] != 'F':
+                    cLarge = probGrid[i][x]
+                    riskMoves = toInput(i, x)
+
+    f = open("grid.txt", "a")
+    f.write("\nGood Moves \n")
+    f.write(goodMoves)
+    f.write('\nRisk Moves \n')
+    f.write(riskMoves)
+    f.close()
 
 def playgame():
     gridsize = 9
@@ -364,6 +404,7 @@ def playgame():
                 f.write("| " + str(tmp) + " | ")
             f.write('\n')
         f.close()
+        nMove(currgrid, probGrid, gridsize, helpmessage, cProb)
         print(message)
 
 playgame()

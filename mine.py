@@ -181,7 +181,7 @@ def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
         if(pVal[i] == ' '):
             pVal[i] = prob
         else:
-            pVal[i] = 0
+            pVal[i] = -1
 
     return pVal
 
@@ -229,22 +229,46 @@ def AI(currgrid, probGrid):
                     #Evaluating the spaces
                     # print(i, x)
                     pVal = Eval(cnode, str(tl), str(tm), str(tr), str(ml), str(mr), str(bl), str(bm), str(br))
-                    if(pVal[0] != 0):
-                        pGrid[i + 1][x - 1] += pVal[0]
-                    if(pVal[1] != 0):
-                        pGrid[i + 1][x] += pVal[1]
-                    if(pVal[2] != 0):
-                        pGrid[i + 1][x + 1] += pVal[2]
-                    if(pVal[3] != 0):
-                        pGrid[i][x - 1] += pVal[3]
-                    if(pVal[4] != 0):
-                        pGrid[i][x + 1] += pVal[4]
-                    if(pVal[5] != 0):
-                        pGrid[i - 1][x - 1] += pVal[5]
-                    if(pVal[6] != 0):
-                        pGrid[i - 1][x] += pVal[6]
-                    if(pVal[7] != 0):
-                        pGrid[i - 1][x + 1] += pVal[7]
+                    if(pVal[0] != -1):
+                        if pVal[0] == 0:
+                            pGrid[i + 1][x - 1] = 0;
+                        elif pGrid[i + 1][x - 1] != 0:
+                            pGrid[i + 1][x - 1] += pVal[0]
+                    if(pVal[1] != -1):
+                        if pVal[1] == 0:
+                             pGrid[i + 1][x] = 0
+                        elif pGrid[i + 1][x] != 0:
+                            pGrid[i + 1][x] += pVal[1]
+                    if(pVal[2] != -1):
+                        if pVal[2] == 0:
+                            pGrid[i + 1][x + 1] = 0
+                        elif pGrid[i + 1][x + 1] != 0:
+                            pGrid[i + 1][x + 1] += pVal[2]
+                    if(pVal[3] != -1):
+                        if pVal[3] == 0:
+                            pGrid[i][x - 1] = 0
+                        elif pGrid[i][x - 1] != 0:
+                            pGrid[i][x - 1] += pVal[3]
+                    if(pVal[4] != -1):
+                        if pVal[4] == 0:
+                            pGrid[i][x + 1] = 0
+                        elif pGrid[i][x + 1] != 0:
+                            pGrid[i][x + 1] += pVal[4]
+                    if(pVal[5] != -1):
+                        if pVal[5] == 0:
+                            pGrid[i - 1][x - 1] = 0
+                        elif pGrid[i - 1][x - 1] != 0:
+                            pGrid[i - 1][x - 1] += pVal[5]
+                    if(pVal[6] != -1):
+                        if pVal[6] == 0:
+                            pGrid[i - 1][x] = 0
+                        elif pGrid[i - 1][x] != 0:
+                            pGrid[i - 1][x] += pVal[6]
+                    if(pVal[7] != -1):
+                        if pVal[7] == 0:
+                            pGrid[i - 1][x + 1] = 0
+                        elif pGrid[i - 1][x + 1] != 0:
+                            pGrid[i - 1][x + 1] += pVal[7]
 
     return pGrid
 
@@ -329,8 +353,8 @@ def playgame():
                 return
 
         showgrid(currgrid)
-        probGrid = AI(currgrid, probGrid)
         probGrid = quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb)
+        probGrid = AI(currgrid, probGrid)
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         f = open("grid.txt", "a")

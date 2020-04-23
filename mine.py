@@ -330,19 +330,20 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     cSmall = 999
     cLarge = 0
     for i in range(gridsize):
+        probGrid[i]
         for x in range(gridsize):
-            if probGrid[i][x] >= 0:
-                if probGrid[i][x] < cSmall:
-                    if currgrid[i][x] == ' ':
-                        cSmall = probGrid[i][x]
-                        goodMoves = toInput(i, x)
+            if probGrid[i][x] >= 0 and probGrid[i][x] < cSmall and currgrid[i][x] == ' ':
+                if probGrid[i][x] <= 0:
+                    cSmall = -1
+                else:
+                    cSmall = probGrid[i][x]
+                goodMoves = toInput(i, x)
                     
-            if probGrid[i][x] > cLarge:
-                if currgrid[i][x] != 'F':
-                    cLarge = probGrid[i][x]
-                    riskMoves = toInput(i, x)
-                    if int(probGrid[i][x]) == 1:
-                        riskMoves += "f"
+            if probGrid[i][x] > cLarge and currgrid[i][x] != 'F':
+                cLarge = probGrid[i][x]
+                riskMoves = toInput(i, x)
+                if int(probGrid[i][x]) == 1:
+                    riskMoves += "f"
 
     # f = open("grid.txt", "a")
     # f.write("\nGood Moves \n")
@@ -351,7 +352,7 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     # f.write(riskMoves)
     # f.close()
 
-    if riskMoves.find("f") != -1:
+    if len(riskMoves) > 2:
         return riskMoves
     else:
         return goodMoves
@@ -368,6 +369,8 @@ def playgame():
     starttime = 0
     if(os.path.exists("grid.txt")):
         os.remove("grid.txt")
+    if(os.path.exists("pgrid.txt")):
+            os.remove("pgrid.txt")
 
     helpmessage = ("Type the column followed by the row (eg. a5). "
                    "To put or remove a flag, add 'f' to the cell (eg. a5f).")
@@ -435,11 +438,7 @@ def playgame():
                 message = "That cell is already shown"
 
             if set(flags) == set(mines):
-                minutes, seconds = divmod(int(time.time() - starttime), 60)
-                print(
-                    'You Win. '
-                    'It took you {} minutes and {} seconds.\n'.format(minutes,
-                                                                      seconds))
+                print('You Win!!!')
                 showgrid(grid)
                 f = open("grid.txt", "a")
                 f.write(nextM + "\n")
@@ -465,6 +464,14 @@ def playgame():
         f = open("grid.txt", "a")
         f.write(nextM + "\n")
         for ele in currgrid:
+            for i in ele:
+                f.write("| " + str(i) + " | ")
+            f.write('\n')
+        f.write("\n\n")
+        f.close()
+        f = open("pgrid.txt", "a")
+        f.write(nextM + "\n")
+        for ele in probGrid:
             for i in ele:
                 f.write("| " + str(i) + " | ")
             f.write('\n')

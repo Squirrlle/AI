@@ -76,7 +76,7 @@ def revieledNei(i, x, currgrid):
             if y == 0 and z == 0:
                 continue
             elif -1 < (i + y) < gridsize and -1 < (x + z) < gridsize:
-                if currgrid[i + y][x + z] != ' ':
+                if currgrid[i + y][x + z] != ' ' and currgrid[i + y][x + z] != 'F':
                     numRevieled += 1
     return numRevieled
 
@@ -89,7 +89,9 @@ def advProb(currgrid, probGrid, cProb):
                 continue
             else:
                 nRev = revieledNei(i, x, currgrid)
-                if nRev == 0 or probGrid[i][x] == 0:
+                if probGrid[i][x] == 100:
+                    pG[i][x] = 1
+                elif nRev == 0 or probGrid[i][x] == 0:
                     #TODO potentially change
                     continue
                 else:
@@ -202,7 +204,6 @@ def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
 
     return pVal
 
-#TODO if chance is 100 make sure that stays
 def AI(currgrid, probGrid):
     gridsize = 9
     pGrid = copy.deepcopy(probGrid)
@@ -250,41 +251,57 @@ def AI(currgrid, probGrid):
                     if(pVal[0] != -1):
                         if pVal[0] == 0:
                             pGrid[i + 1][x - 1] = 0
+                        elif pVal[0] == 1 or pGrid[i + 1][x - 1] == 100:
+                            pGrid[i + 1][x - 1] = 100
                         elif pGrid[i + 1][x - 1] != 0:
                             pGrid[i + 1][x - 1] += pVal[0]
                     if(pVal[1] != -1):
                         if pVal[1] == 0:
                              pGrid[i + 1][x] = 0
+                        elif pVal[1] == 1 or pGrid[i + 1][x] == 100:
+                            pGrid[i + 1][x] = 100
                         elif pGrid[i + 1][x] != 0:
                             pGrid[i + 1][x] += pVal[1]
                     if(pVal[2] != -1):
                         if pVal[2] == 0:
                             pGrid[i + 1][x + 1] = 0
+                        elif pVal[2] == 1 or pGrid[i + 1][x + 1] == 100:
+                            pGrid[i + 1][x + 1] = 100
                         elif pGrid[i + 1][x + 1] != 0:
                             pGrid[i + 1][x + 1] += pVal[2]
                     if(pVal[3] != -1):
                         if pVal[3] == 0:
                             pGrid[i][x - 1] = 0
+                        elif pVal[3] == 1 or pGrid[i][x - 1] == 100:
+                            pGrid[i][x - 1] = 100
                         elif pGrid[i][x - 1] != 0:
                             pGrid[i][x - 1] += pVal[3]
                     if(pVal[4] != -1):
                         if pVal[4] == 0:
                             pGrid[i][x + 1] = 0
+                        elif pVal[4] == 1 or pGrid[i][x + 1] == 100:
+                            pGrid[i][x + 1] = 100
                         elif pGrid[i][x + 1] != 0:
                             pGrid[i][x + 1] += pVal[4]
                     if(pVal[5] != -1):
                         if pVal[5] == 0:
                             pGrid[i - 1][x - 1] = 0
+                        elif pVal[5] == 1 or pGrid[i - 1][x - 1] == 100:
+                            pGrid[i - 1][x - 1] = 100
                         elif pGrid[i - 1][x - 1] != 0:
                             pGrid[i - 1][x - 1] += pVal[5]
                     if(pVal[6] != -1):
                         if pVal[6] == 0:
                             pGrid[i - 1][x] = 0
+                        elif pVal[6] == 1 or pGrid[i - 1][x] == 100:
+                            pGrid[i - 1][x] = 100
                         elif pGrid[i - 1][x] != 0:
                             pGrid[i - 1][x] += pVal[6]
                     if(pVal[7] != -1):
                         if pVal[7] == 0:
                             pGrid[i - 1][x + 1] = 0
+                        elif pVal[7] == 1 or pGrid[i - 1][x + 1] == 100:
+                            pGrid[i - 1][x + 1] = 100
                         elif pGrid[i - 1][x + 1] != 0:
                             pGrid[i - 1][x + 1] += pVal[7]
 

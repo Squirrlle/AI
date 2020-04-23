@@ -321,7 +321,7 @@ def toInput(i, x):
     }
     temp = switcher.get(x, "Invalid")
     i += 1
-    move = "( " +temp + ", " + str(i) + " ), "
+    move = "( " +temp + ", " + str(i) + " ) "
     return move
 
 def most_frequent(probGrid):
@@ -340,10 +340,15 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
                     if currgrid[i][x] == ' ':
                         cSmall = probGrid[i][x]
                         goodMoves = toInput(i, x)
+                        if int(math.ceil(probGrid[i][x])) == 0:
+                            goodMoves += " 0" 
+                    
             if probGrid[i][x] > cLarge:
                 if currgrid[i][x] != 'F':
                     cLarge = probGrid[i][x]
                     riskMoves = toInput(i, x)
+                    if int(probGrid[i][x]) == 1:
+                        riskMoves += "f"
 
     f = open("grid.txt", "a")
     f.write("\nGood Moves \n")

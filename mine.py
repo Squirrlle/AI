@@ -144,10 +144,11 @@ def showcells(grid, currgrid, rowno, colno):
 
 def playagain():
     choice = input('Play again? (y/n): ')
-    if(os.path.exists("grid.txt")):
-        os.remove("grid.txt")
-    if(os.path.exists("pgrid.txt")):
-            os.remove("pgrid.txt")
+    if(choice.lower() == 'y'):
+        if(os.path.exists("grid.txt")):
+            os.remove("grid.txt")
+        if(os.path.exists("pgrid.txt")):
+                os.remove("pgrid.txt")
     return choice.lower() == 'y'
 
 
@@ -430,6 +431,14 @@ def playgame():
                     f.write('\n')
                 f.write("\n\n")
                 f.close()
+                f = open("pgrid.txt", "a")
+                for ele in probGrid:
+                    for i in ele:
+                        tmp = "{:.3f}".format(i)
+                        f.write("| " + str(tmp) + " | ")
+                    f.write('\n')
+                f.write("\n\n")
+                f.close()
                 if playagain():
                     playgame()
                 return
@@ -448,6 +457,14 @@ def playgame():
                 for ele in currgrid:
                     for i in ele:
                         f.write("| " + str(i) + " | ")
+                    f.write('\n')
+                f.write("\n\n")
+                f.close()
+                f = open("pgrid.txt", "a")
+                for ele in probGrid:
+                    for i in ele:
+                        tmp = "{:.3f}".format(i)
+                        f.write("| " + str(tmp) + " | ")
                     f.write('\n')
                 f.write("\n\n")
                 f.close()
@@ -476,7 +493,8 @@ def playgame():
         f.write(nextM + "\n")
         for ele in probGrid:
             for i in ele:
-                f.write("| " + str(i) + " | ")
+                tmp = "{:.3f}".format(i)
+                f.write("| " + str(tmp) + " | ")
             f.write('\n')
         f.write("\n\n")
         f.close()

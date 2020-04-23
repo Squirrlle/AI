@@ -5,7 +5,6 @@ import time
 import math
 import os
 import copy
-import random
 from random import randint
 from collections import Counter 
 from string import ascii_lowercase
@@ -417,6 +416,14 @@ def playgame():
             elif grid[rowno][colno] == 'X':
                 print('Game Over\n')
                 showgrid(grid)
+                f = open("grid.txt", "a")
+                f.write(nextM + "\n")
+                for ele in currgrid:
+                    for i in ele:
+                        f.write("| " + str(i) + " | ")
+                    f.write('\n')
+                f.write("\n\n")
+                f.close()
                 if playagain():
                     playgame()
                 return

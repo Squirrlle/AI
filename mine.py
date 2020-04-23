@@ -144,7 +144,10 @@ def showcells(grid, currgrid, rowno, colno):
 
 def playagain():
     choice = input('Play again? (y/n): ')
-
+    if(os.path.exists("grid.txt")):
+        os.remove("grid.txt")
+    if(os.path.exists("pgrid.txt")):
+            os.remove("pgrid.txt")
     return choice.lower() == 'y'
 
 

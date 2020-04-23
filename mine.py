@@ -5,6 +5,8 @@ import time
 import math
 import os
 import copy
+import random
+from random import randint
 from collections import Counter 
 from string import ascii_lowercase
 
@@ -187,7 +189,6 @@ def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
         for x in range(gridsize):
             if currgrid[i][x].isdigit():
                 pG[i][x] = 0
-
     return pG
 
 def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
@@ -321,12 +322,8 @@ def toInput(i, x):
     }
     temp = switcher.get(x, "Invalid")
     i += 1
-    move = "( " +temp + ", " + str(i) + " ) "
+    move = temp + str(i)
     return move
-
-def most_frequent(probGrid):
-    flatList = [el for sublist in probGrid for el in sublist]
-    return max(flatList, key = flatList.count)
 
 def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     goodMoves = ""
@@ -340,8 +337,6 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
                     if currgrid[i][x] == ' ':
                         cSmall = probGrid[i][x]
                         goodMoves = toInput(i, x)
-                        if int(math.ceil(probGrid[i][x])) == 0:
-                            goodMoves += " 0" 
                     
             if probGrid[i][x] > cLarge:
                 if currgrid[i][x] != 'F':
@@ -350,21 +345,30 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
                     if int(probGrid[i][x]) == 1:
                         riskMoves += "f"
 
-    f = open("grid.txt", "a")
-    f.write("\nGood Moves \n")
-    f.write(goodMoves)
-    f.write('\nRisk Moves \n')
-    f.write(riskMoves)
-    f.close()
+    # f = open("grid.txt", "a")
+    # f.write("\nGood Moves \n")
+    # f.write(goodMoves)
+    # f.write('\nRisk Moves \n')
+    # f.write(riskMoves)
+    # f.close()
+
+    if riskMoves.find("f") != -1:
+        return riskMoves
+    else:
+        return goodMoves
 
 def playgame():
     gridsize = 9
     numberofmines = 10
     currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
-
+    ranI = randint(0,8)
+    ranX = randint(0, 8)
+    nextM = toInput(ranI, ranX)
     grid = []
     flags = []
     starttime = 0
+    if(os.path.exists("grid.txt")):
+        os.remove("grid.txt")
 
     helpmessage = ("Type the column followed by the row (eg. a5). "
                    "To put or remove a flag, add 'f' to the cell (eg. a5f).")
@@ -374,8 +378,11 @@ def playgame():
 
     while True:
         minesleft = numberofmines - len(flags)
-        prompt = input('Enter the cell ({} mines left): '.format(minesleft))
+        print(nextM + "\n")
+        # prompt = input('Enter the cell ({} mines left): '.format(minesleft))
+        prompt = nextM
         result = parseinput(prompt, gridsize, helpmessage + '\n')
+        # result = nextM
 
         message = result['message']
         cell = result['cell']
@@ -427,6 +434,14 @@ def playgame():
                     'It took you {} minutes and {} seconds.\n'.format(minutes,
                                                                       seconds))
                 showgrid(grid)
+                f = open("grid.txt", "a")
+                f.write(nextM + "\n")
+                for ele in currgrid:
+                    for i in ele:
+                        f.write("| " + str(i) + " | ")
+                    f.write('\n')
+                f.write("\n\n")
+                f.close()
                 if playagain():
                     playgame()
                 return
@@ -438,16 +453,17 @@ def playgame():
         probGrid = quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb)
         probGrid = AI(currgrid, probGrid)
         probGrid = advProb(currgrid, probGrid, cProb)
-        if(os.path.exists("grid.txt")):
-            os.remove("grid.txt")
+        #if(os.path.exists("grid.txt")):
+        #    os.remove("grid.txt")
         f = open("grid.txt", "a")
-        for ele in probGrid:
+        f.write(nextM + "\n")
+        for ele in currgrid:
             for i in ele:
-                tmp = "{:.3f}".format(i)
-                f.write("| " + str(tmp) + " | ")
+                f.write("| " + str(i) + " | ")
             f.write('\n')
+        f.write("\n\n")
         f.close()
-        nMove(currgrid, probGrid, gridsize, minesleft, cProb)
+        nextM = nMove(currgrid, probGrid, gridsize, minesleft, cProb)
         print(message)
 
 playgame()

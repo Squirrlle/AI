@@ -6,7 +6,7 @@ import math
 import os
 import copy
 from random import randint
-from collections import Counter 
+from collections import Counter
 from string import ascii_lowercase
 
 def setupgrid(gridsize, start, numberofmines):
@@ -20,7 +20,6 @@ def setupgrid(gridsize, start, numberofmines):
     grid = getnumbers(emptygrid)
 
     return (grid, mines)
-
 
 def showgrid(grid):
     gridsize = len(grid)
@@ -46,7 +45,6 @@ def showgrid(grid):
 
     print('')
 
-
 def getrandomcell(grid):
     gridsize = len(grid)
 
@@ -54,7 +52,6 @@ def getrandomcell(grid):
     b = random.randint(0, gridsize - 1)
 
     return (a, b)
-
 
 def getneighbors(grid, rowno, colno):
     gridsize = len(grid)
@@ -111,7 +108,6 @@ def getmines(grid, start, numberofmines):
 
     return mines
 
-
 def getnumbers(grid):
     for rowno, row in enumerate(grid):
         for colno, cell in enumerate(row):
@@ -124,7 +120,6 @@ def getnumbers(grid):
                 grid[rowno][colno] = str(values.count('X'))
 
     return grid
-
 
 def showcells(grid, currgrid, rowno, colno):
     # Exit function if the cell was already shown
@@ -141,7 +136,6 @@ def showcells(grid, currgrid, rowno, colno):
             if currgrid[r][c] != 'F':
                 showcells(grid, currgrid, r, c)
 
-
 def playagain():
     choice = input('Play again? (y/n): ')
     if(choice.lower() == 'y'):
@@ -150,7 +144,6 @@ def playagain():
         if(os.path.exists("pgrid.txt")):
                 os.remove("pgrid.txt")
     return choice.lower() == 'y'
-
 
 def parseinput(inputstring, gridsize, helpmessage):
     cell = ()
@@ -174,7 +167,6 @@ def parseinput(inputstring, gridsize, helpmessage):
 
     return {'cell': cell, 'flag': flag, 'message': message}
 
-
 def difProb(currgrid, gridsize, minesleft):
     numRevield = 0
     for i in range(gridsize):
@@ -184,7 +176,6 @@ def difProb(currgrid, gridsize, minesleft):
     cellLeft = (gridsize * gridsize) - numRevield
     newProb = (minesleft) / cellLeft
     return newProb
-
 
 def quickUpdate(currgrid, probGrid, gridsize, minesleft, cProb):
     pG = copy.deepcopy(probGrid)
@@ -209,7 +200,7 @@ def Eval(cnode, tl, tm, tr, ml, mr, bl, bm, br):
     return pVal
 
 def AI(currgrid, probGrid):
-    gridsize = 9
+    gridsize = len(currgrid)
     pGrid = copy.deepcopy(probGrid)
     for i in range(gridsize):
         for x in range(gridsize):
@@ -321,8 +312,26 @@ def toInput(i, x):
         5: "f",
         6: "g",
         7: "h",
-        8: "i"
+        8: "i",
+        9: "j",
+        10: "k",
+        11: "l",
+        12: "m",
+        13: "n",
+        14: "o",
+        15: "p",
+        16: "q",
+        18: "r",
+        19: "s",
+        20: "t",
+        21: "u",
+        22: "v",
+        23: "w",
+        24: "x",
+        25: "y",
+        26: "z"
     }
+    
     temp = switcher.get(x, "Invalid")
     i += 1
     move = temp + str(i)
@@ -356,15 +365,16 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
     # f.write(riskMoves)
     # f.close()
 
-    if len(riskMoves) > 2:
+    if riskMoves[-1] == "f":
         return riskMoves
     else:
         return goodMoves
 
-def playgame():
-    gridsize = 9
-    numberofmines = 10
+def playgame(g, m):
+    gridsize = g
+    numberofmines = m
     currgrid = [[' ' for i in range(gridsize)] for i in range(gridsize)]
+    probGrid = currgrid
     ranI = randint(0,8)
     ranX = randint(0, 8)
     nextM = toInput(ranI, ranX)
@@ -440,7 +450,7 @@ def playgame():
                 f.write("\n\n")
                 f.close()
                 if playagain():
-                    playgame()
+                    playgame(g, m)
                 return
 
             elif currcell == ' ':
@@ -469,7 +479,7 @@ def playgame():
                 f.write("\n\n")
                 f.close()
                 if playagain():
-                    playgame()
+                    playgame(g, m)
                 return
 
         showgrid(currgrid)
@@ -501,4 +511,9 @@ def playgame():
         nextM = nMove(currgrid, probGrid, gridsize, minesleft, cProb)
         print(message)
 
-playgame()
+print("Normal (9x9)\nHard (14x14)\n")
+dif = input("Select difficulty (N/H)")
+if(dif.lower() == "h"):
+    playgame(14, 15)
+else:
+    playgame(9, 10)

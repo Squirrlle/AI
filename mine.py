@@ -9,6 +9,8 @@ from random import randint
 from collections import Counter
 from string import ascii_lowercase
 
+count = 0
+
 def setupgrid(gridsize, start, numberofmines):
     emptygrid = [['0' for i in range(gridsize)] for i in range(gridsize)]
 
@@ -22,6 +24,8 @@ def setupgrid(gridsize, start, numberofmines):
     return (grid, mines)
 
 def showgrid(grid):
+    global count
+    count = count + 1
     gridsize = len(grid)
 
     horizontal = '   ' + (4 * gridsize * '-') + '-'
@@ -44,6 +48,7 @@ def showgrid(grid):
         print(row + '\n' + horizontal)
 
     print('')
+    print("count ", count - 1, '\n')
 
 def getrandomcell(grid):
     gridsize = len(grid)
@@ -137,8 +142,10 @@ def showcells(grid, currgrid, rowno, colno):
                 showcells(grid, currgrid, r, c)
 
 def playagain():
+    global count
     choice = input('Play again? (y/n): ')
     if(choice.lower() == 'y'):
+        count = 0
         if(os.path.exists("grid.txt")):
             os.remove("grid.txt")
         if(os.path.exists("pgrid.txt")):
@@ -331,7 +338,7 @@ def toInput(i, x):
         25: "y",
         26: "z"
     }
-    
+
     temp = switcher.get(x, "Invalid")
     i += 1
     move = temp + str(i)
@@ -351,7 +358,7 @@ def nMove(currgrid, probGrid, gridsize, minesleft, cProb):
                 else:
                     cSmall = probGrid[i][x]
                 goodMoves = toInput(i, x)
-                    
+
             if probGrid[i][x] > cLarge and currgrid[i][x] != 'F':
                 cLarge = probGrid[i][x]
                 riskMoves = toInput(i, x)

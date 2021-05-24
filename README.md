@@ -1,3 +1,3 @@
 # AI
 
-Our AI Final
+A bot to play minesweeper
